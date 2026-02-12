@@ -6,22 +6,21 @@ import { test, expect } from '@playwright/test'
 // Assert - Verificar o resultado
 
 test('Procurar um pedido existente', async ({ page }) => {
- // Arrange
+  // Arrange
   await page.goto('http://localhost:5173/')
   await expect(page.getByTestId('hero-section').getByRole('heading', { name: 'Velô Sprint' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Consultar Pedido' })).toBeVisible()
+  await page.getByRole('link', { name: 'Consultar Pedido' }).click()
  
   // Act
-  await page.getByRole('link', { name: 'Consultar Pedido' }).click()
   await expect(page.getByRole('heading', { name: 'Consultar Pedido' })).toBeVisible()
-  await expect(page.getByTestId('search-order-id')).toBeVisible()
-  await page.getByTestId('search-order-id').fill('VLO-Z7BH0H')
-  await page.getByTestId('search-order-button').click()
+  await expect(page.getByLabel('Número do Pedido')).toBeVisible()
   
-  // Assert
-  await expect(page.getByTestId('order-result-id')).toBeVisible()
-  await expect(page.getByTestId('order-result-id')).toContainText('VLO-Z7BH0H')
+  await page.getByLabel('Número do Pedido').fill('VLO-Z7BH0H')
+  await expect(page.getByRole('button', { name: 'Buscar Pedido' })).toBeVisible()
+  await page.getByRole('button', { name: 'Buscar Pedido' }).click()
 
-  await expect(page.getByTestId('order-result-status')).toBeVisible()
-  await expect(page.getByTestId('order-result-status')).toContainText('APROVADO')
+  // Assert
+  await expect(page.getByText('VLO-Z7BH0H')).toBeVisible({ timeout: 10_000 })
+  await expect(page.getByText('APROVADO')).toBeVisible()
 })

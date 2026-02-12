@@ -36,15 +36,17 @@ const colorLabels: Record<ExteriorColor, string> = {
   'midnight-black': 'Midnight Black',
 };
 
+type ErrorState = 'none' | 'not_found' | 'connection_error';
+
 const OrderLookup = () => {
   const [orderId, setOrderId] = useState('');
   const [searchedOrder, setSearchedOrder] = useState<Order | null>(null);
-  const [notFound, setNotFound] = useState(false);
+  const [errorState, setErrorState] = useState<ErrorState>('none');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    setNotFound(false);
+    setErrorState('none');
     setSearchedOrder(null);
     setIsLoading(true);
     
@@ -53,14 +55,16 @@ const OrderLookup = () => {
     setIsLoading(false);
     
     if (error) {
-      setNotFound(true);
+      // Database/connection error (e.g. DB down, network failure)
+      setErrorState('connection_error');
       return;
     }
     
     if (order) {
       setSearchedOrder(order);
     } else {
-      setNotFound(true);
+      // Order doesn't exist - valid lookup, no results
+      setErrorState('not_found');
     }
   };
 
@@ -86,7 +90,6 @@ const OrderLookup = () => {
                 <Label htmlFor="order-id">Número do Pedido</Label>
                 <Input
                   id="order-id"
-                  data-testid="search-order-id"
                   type="text"
                   placeholder="Ex: VLO-ABC123"
                   value={orderId}
@@ -96,7 +99,6 @@ const OrderLookup = () => {
               </div>
               <Button
                 type="submit"
-                data-testid="search-order-button"
                 className="w-full"
                 disabled={!orderId.trim() || isLoading}
               >
@@ -116,8 +118,8 @@ const OrderLookup = () => {
           </CardContent>
         </Card>
 
-        {/* Not Found Message */}
-        {notFound && (
+        {/* Error Messages */}
+        {errorState === 'not_found' && (
           <Card className="border-destructive/50 bg-destructive/5 animate-fade-in">
             <CardContent className="py-8 text-center">
               <XCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
@@ -126,6 +128,20 @@ const OrderLookup = () => {
               </h3>
               <p className="text-muted-foreground">
                 Verifique o número do pedido e tente novamente
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {errorState === 'connection_error' && (
+          <Card className="border-amber-500/50 bg-amber-500/5 animate-fade-in">
+            <CardContent className="py-8 text-center">
+              <XCircle className="w-12 h-12 text-amber-600 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">
+                Serviço temporariamente indisponível
+              </h3>
+              <p className="text-muted-foreground">
+                Não foi possível conectar ao sistema. Por favor, tente novamente em alguns instantes.
               </p>
             </CardContent>
           </Card>
@@ -140,13 +156,12 @@ const OrderLookup = () => {
                   <Package className="w-5 h-5 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">Pedido</p>
-                    <p className="font-mono font-medium" data-testid="order-result-id">
+                    <p className="font-mono font-medium">
                       {searchedOrder.id}
                     </p>
                   </div>
                 </div>
                 <div
-                  data-testid="order-result-status"
                   className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
                     searchedOrder.status === 'APROVADO'
                       ? 'bg-green-100 text-green-700'
