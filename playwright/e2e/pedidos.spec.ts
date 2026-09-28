@@ -88,8 +88,8 @@ test.describe('Consulta de Pedido', () => {
 		}
 
 		// Act
-		await page.getByRole('textbox', { name: 'Número do Pedido' }).fill(order.number)
-		await page.getByRole('button', { name: 'Buscar Pedido' }).click()
+		const orderLookupPage = new OrderLookupPage(page)
+		await orderLookupPage.searchOrder(order.number)
 
 		// Assert
 		await expect(page.getByTestId(`order-result-${order.number}`)).toMatchAriaSnapshot(`
@@ -146,8 +146,8 @@ test.describe('Consulta de Pedido', () => {
 		}
 
 		// Act
-		await page.getByRole('textbox', { name: 'Número do Pedido' }).fill(order.number)
-		await page.getByRole('button', { name: 'Buscar Pedido' }).click()
+		const orderLookupPage = new OrderLookupPage(page)
+		await orderLookupPage.searchOrder(order.number)
 
 		// Assert
 		await expect(page.getByTestId(`order-result-${order.number}`)).toMatchAriaSnapshot(`
@@ -192,8 +192,8 @@ test.describe('Consulta de Pedido', () => {
 	test('deve exibir mensagem quando o pedido não é encontrado', async ({ page }) => {
 		const order = generateOrderCode()
 
-		await page.getByRole('textbox', { name: 'Número do Pedido' }).fill(order)
-		await page.getByRole('button', { name: 'Buscar Pedido' }).click()
+		const orderLookupPage = new OrderLookupPage(page)
+		await orderLookupPage.searchOrder(order)
 
 		await expect(page.locator('#root')).toMatchAriaSnapshot(`
       - img
