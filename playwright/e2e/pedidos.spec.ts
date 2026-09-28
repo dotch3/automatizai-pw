@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 import { generateOrderCode } from '../support/helpers'
 
-import { OrderLookupPage } from '../support/pages/OrderLookupPage'
+import { OrderLookupPage, OrderStatus } from '../support/pages/OrderLookupPage'
 /// AAA - Arrange, Act, Assert
 
 test.describe('Consulta de Pedido', () => {
@@ -19,7 +19,7 @@ test.describe('Consulta de Pedido', () => {
 		// Test Data
 		const order = {
 			number: 'VLO-Z7BH0H',
-			status: 'APROVADO',
+			status: 'APROVADO' as OrderStatus,
 			color: 'Midnight Black',
 			wheels: 'aero Wheels',
 			customer: {
@@ -64,20 +64,14 @@ test.describe('Consulta de Pedido', () => {
       - paragraph: /R\\$ \\d+\\.\\d+,\\d+/
       `)
 
-		const statusBadge = page.getByRole('status').filter({ hasText: order.status })
-
-		await expect(statusBadge).toHaveClass(/bg-green-100/)
-		await expect(statusBadge).toHaveClass(/text-green-700/)
-
-		const statusIcon = statusBadge.locator('svg')
-		await expect(statusIcon).toHaveClass(/lucide-circle-check-big/)
+		await orderLookupPage.expectStatusBadge(order.status)
 	})
 
 	test('deve consultar um pedido reprovado', async ({ page }) => {
 		// Test Data
 		const order = {
 			number: 'VLO-ZI4ETT',
-			status: 'REPROVADO',
+			status: 'REPROVADO' as OrderStatus,
 			color: 'Glacier Blue',
 			wheels: 'aero Wheels',
 			customer: {
@@ -122,20 +116,14 @@ test.describe('Consulta de Pedido', () => {
       - paragraph: /R\\$ \\d+\\.\\d+,\\d+/
       `)
 
-		const statusBadge = page.getByRole('status').filter({ hasText: order.status })
-
-		await expect(statusBadge).toHaveClass(/bg-red-100/)
-		await expect(statusBadge).toHaveClass(/text-red-700/)
-
-		const statusIcon = statusBadge.locator('svg')
-		await expect(statusIcon).toHaveClass(/lucide-circle-x/)
+		await orderLookupPage.expectStatusBadge(order.status)
 	})
 
 	test('deve consultar um pedido em analise', async ({ page }) => {
 		// Test Data
 		const order = {
 			number: 'VLO-MB874B',
-			status: 'EM_ANALISE',
+			status: 'EM_ANALISE' as OrderStatus,
 			color: 'Glacier Blue',
 			wheels: 'aero Wheels',
 			customer: {
@@ -180,13 +168,7 @@ test.describe('Consulta de Pedido', () => {
       - paragraph: /R\\$ \\d+\\.\\d+,\\d+/
       `)
 
-		const statusBadge = page.getByRole('status').filter({ hasText: order.status })
-
-		await expect(statusBadge).toHaveClass(/bg-amber-100/)
-		await expect(statusBadge).toHaveClass(/text-amber-700/)
-
-		const statusIcon = statusBadge.locator('svg')
-		await expect(statusIcon).toHaveClass(/lucide-clock/)
+		await orderLookupPage.expectStatusBadge(order.status)
 	})
 
 	test('deve exibir mensagem quando o pedido não é encontrado', async ({ page }) => {
